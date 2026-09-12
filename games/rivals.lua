@@ -22,15 +22,21 @@ local window = UI.createWindow({
 local left = window.createPanel("left")
 local right = window.createPanel("right")
 
+local tabs = UI.createTabs(right)
+
+local aimTab = tabs.addTab("AIM")
+local visualTab = tabs.addTab("VISUAL")
+local assistTab = tabs.addTab("ASSIST")
+local survivalTab = tabs.addTab("SURVIVE")
+
 local state = {
     fly = Utils.createFly({ speed = 100 }),
     walkSpeed = 16,
-    clickTP = false,
 }
 
-UI.createSectionLabel(right, "AIMBOT", 0)
+-- AIM TAB
 
-local aimbotBtn, aimbotStroke = UI.createButton(right, "AIMBOT: OFF", UDim2.new(1, 0, 0, 26), UDim2.new(0, 0, 0, 16))
+local aimbotBtn, aimbotStroke = UI.createButton(aimTab, "AIMBOT: OFF", UDim2.new(1, 0, 0, 30))
 aimbotBtn.MouseButton1Click:Connect(function()
     if FPS.getState().aimbotEnabled then
         FPS.aimbotDisable()
@@ -43,9 +49,42 @@ aimbotBtn.MouseButton1Click:Connect(function()
     end
 end)
 
+local silentBtn, silentStroke = UI.createButton(aimTab, "SILENT AIM: OFF", UDim2.new(1, 0, 0, 30))
+silentBtn.MouseButton1Click:Connect(function()
+    if FPS.getState().silentAimEnabled then
+        FPS.silentAimDisable()
+        silentBtn.Text = "SILENT AIM: OFF"
+        UI.setButtonState(silentBtn, silentStroke, false)
+    else
+        FPS.silentAimEnable()
+        silentBtn.Text = "SILENT AIM: ON"
+        UI.setButtonState(silentBtn, silentStroke, true)
+    end
+end)
+
+local triggerBtn, triggerStroke = UI.createButton(aimTab, "TRIGGERBOT: OFF", UDim2.new(1, 0, 0, 30))
+triggerBtn.MouseButton1Click:Connect(function()
+    if FPS.getState().triggerbotEnabled then
+        FPS.triggerbotDisable()
+        triggerBtn.Text = "TRIGGERBOT: OFF"
+        UI.setButtonState(triggerBtn, triggerStroke, false)
+    else
+        FPS.triggerbotEnable()
+        triggerBtn.Text = "TRIGGERBOT: ON"
+        UI.setButtonState(triggerBtn, triggerStroke, true)
+    end
+end)
+
+local wallbangBtn, wallbangStroke = UI.createButton(aimTab, "WALLBANG: OFF", UDim2.new(1, 0, 0, 30))
+wallbangBtn.MouseButton1Click:Connect(function()
+    local new = not FPS.getState().wallbangEnabled
+    FPS.setWallbang(new)
+    wallbangBtn.Text = new and "WALLBANG: ON" or "WALLBANG: OFF"
+    UI.setButtonState(wallbangBtn, wallbangStroke, new)
+end)
+
 local smoothLabel = Instance.new("TextLabel")
 smoothLabel.Size = UDim2.new(1, 0, 0, 12)
-smoothLabel.Position = UDim2.new(0, 0, 0, 46)
 smoothLabel.BackgroundTransparency = 1
 smoothLabel.Text = "AIM SMOOTHNESS"
 smoothLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -53,14 +92,13 @@ smoothLabel.TextTransparency = 0.55
 smoothLabel.TextScaled = true
 smoothLabel.Font = Enum.Font.Gotham
 smoothLabel.TextXAlignment = Enum.TextXAlignment.Left
-smoothLabel.Parent = right
+smoothLabel.Parent = aimTab
 
 local smoothFrame = Instance.new("Frame")
 smoothFrame.Size = UDim2.new(1, 0, 0, 26)
-smoothFrame.Position = UDim2.new(0, 0, 0, 60)
 smoothFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 smoothFrame.BorderSizePixel = 0
-smoothFrame.Parent = right
+smoothFrame.Parent = aimTab
 
 local sfc = Instance.new("UICorner")
 sfc.CornerRadius = UDim.new(0, 8)
@@ -118,9 +156,9 @@ smoothDown.MouseButton1Click:Connect(function()
     smoothValue.Text = tostring(math.floor(s * 100))
 end)
 
-UI.createSectionLabel(right, "VISUALS", 96)
+-- VISUAL TAB
 
-local espBtn, espStroke = UI.createButton(right, "ESP: OFF", UDim2.new(1, 0, 0, 26), UDim2.new(0, 0, 0, 112))
+local espBtn, espStroke = UI.createButton(visualTab, "ESP: OFF", UDim2.new(1, 0, 0, 30))
 espBtn.MouseButton1Click:Connect(function()
     if FPS.getState().espEnabled then
         FPS.espDisable()
@@ -133,22 +171,7 @@ espBtn.MouseButton1Click:Connect(function()
     end
 end)
 
-UI.createSectionLabel(right, "ASSIST", 146)
-
-local triggerBtn, triggerStroke = UI.createButton(right, "TRIGGERBOT: OFF", UDim2.new(1, 0, 0, 26), UDim2.new(0, 0, 0, 162))
-triggerBtn.MouseButton1Click:Connect(function()
-    if FPS.getState().triggerbotEnabled then
-        FPS.triggerbotDisable()
-        triggerBtn.Text = "TRIGGERBOT: OFF"
-        UI.setButtonState(triggerBtn, triggerStroke, false)
-    else
-        FPS.triggerbotEnable()
-        triggerBtn.Text = "TRIGGERBOT: ON"
-        UI.setButtonState(triggerBtn, triggerStroke, true)
-    end
-end)
-
-local teamBtn, teamStroke = UI.createButton(right, "TEAM CHECK: OFF", UDim2.new(1, 0, 0, 26), UDim2.new(0, 0, 0, 192))
+local teamBtn, teamStroke = UI.createButton(visualTab, "TEAM CHECK: OFF", UDim2.new(1, 0, 0, 30))
 teamBtn.MouseButton1Click:Connect(function()
     local new = not FPS.getState().teamCheck
     FPS.setTeamCheck(new)
@@ -156,7 +179,7 @@ teamBtn.MouseButton1Click:Connect(function()
     UI.setButtonState(teamBtn, teamStroke, new)
 end)
 
-local wallBtn, wallStroke = UI.createButton(right, "WALL CHECK: ON", UDim2.new(1, 0, 0, 26), UDim2.new(0, 0, 0, 222))
+local wallBtn, wallStroke = UI.createButton(visualTab, "WALL CHECK: ON", UDim2.new(1, 0, 0, 30))
 UI.setButtonState(wallBtn, wallStroke, true)
 wallBtn.MouseButton1Click:Connect(function()
     local new = not FPS.getState().wallCheck
@@ -165,9 +188,9 @@ wallBtn.MouseButton1Click:Connect(function()
     UI.setButtonState(wallBtn, wallStroke, new)
 end)
 
-UI.createSectionLabel(right, "MOVEMENT", 258)
+-- ASSIST TAB
 
-local flyBtn, flyStroke = UI.createButton(right, "FLY: OFF", UDim2.new(1, 0, 0, 26), UDim2.new(0, 0, 0, 274))
+local flyBtn, flyStroke = UI.createButton(assistTab, "FLY: OFF", UDim2.new(1, 0, 0, 30))
 flyBtn.MouseButton1Click:Connect(function()
     local on = state.fly:toggle()
     flyBtn.Text = on and "FLY: ON" or "FLY: OFF"
@@ -176,7 +199,6 @@ end)
 
 local walkLabel = Instance.new("TextLabel")
 walkLabel.Size = UDim2.new(1, 0, 0, 12)
-walkLabel.Position = UDim2.new(0, 0, 0, 304)
 walkLabel.BackgroundTransparency = 1
 walkLabel.Text = "WALK SPEED"
 walkLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -184,14 +206,13 @@ walkLabel.TextTransparency = 0.55
 walkLabel.TextScaled = true
 walkLabel.Font = Enum.Font.Gotham
 walkLabel.TextXAlignment = Enum.TextXAlignment.Left
-walkLabel.Parent = right
+walkLabel.Parent = assistTab
 
 local walkFrame = Instance.new("Frame")
 walkFrame.Size = UDim2.new(1, 0, 0, 26)
-walkFrame.Position = UDim2.new(0, 0, 0, 318)
 walkFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 walkFrame.BorderSizePixel = 0
-walkFrame.Parent = right
+walkFrame.Parent = assistTab
 
 local wfc = Instance.new("UICorner")
 wfc.CornerRadius = UDim.new(0, 8)
@@ -249,6 +270,36 @@ walkDown.MouseButton1Click:Connect(function()
     if hum then hum.WalkSpeed = state.walkSpeed end
 end)
 
+-- SURVIVE TAB
+
+local noclipBtn, noclipStroke = UI.createButton(survivalTab, "NOCLIP: OFF", UDim2.new(1, 0, 0, 30))
+noclipBtn.MouseButton1Click:Connect(function()
+    if FPS.getState().noclipEnabled then
+        FPS.noclipDisable()
+        noclipBtn.Text = "NOCLIP: OFF"
+        UI.setButtonState(noclipBtn, noclipStroke, false)
+    else
+        FPS.noclipEnable()
+        noclipBtn.Text = "NOCLIP: ON"
+        UI.setButtonState(noclipBtn, noclipStroke, true)
+    end
+end)
+
+local invBtn, invStroke = UI.createButton(survivalTab, "INVINCIBLE: OFF", UDim2.new(1, 0, 0, 30))
+invBtn.MouseButton1Click:Connect(function()
+    if FPS.getState().invincibleEnabled then
+        FPS.invincibleDisable()
+        invBtn.Text = "INVINCIBLE: OFF"
+        UI.setButtonState(invBtn, invStroke, false)
+    else
+        FPS.invincibleEnable()
+        invBtn.Text = "INVINCIBLE: ON"
+        UI.setButtonState(invBtn, invStroke, true)
+    end
+end)
+
+-- PLAYER LIST
+
 local playersLabel = Instance.new("TextLabel")
 playersLabel.Size = UDim2.new(1, 0, 0, 20)
 playersLabel.BackgroundTransparency = 1
@@ -268,82 +319,49 @@ local function updatePlayerList()
     end
     local count = 0
     for _, plr in pairs(Players:GetPlayers()) do
-        if plr ~= Players.LocalPlayer then
-            local char = plr.Character            if char and char.Parent then
-                count = count + 1
-                local row = Instance.new("Frame")
-                row.Size = UDim2.new(1, -8, 0, 28)
-                row.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-                row.BorderSizePixel = 0
-                row.LayoutOrder = count
-                row.Parent = playerList
+        if plr ~= Players.LocalPlayer and plr.Character and plr.Character.Parent then
+            count = count + 1
+            local row = Instance.new("Frame")
+            row.Size = UDim2.new(1, -8, 0, 28)
+            row.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+            row.BorderSizePixel = 0
+            row.LayoutOrder = count
+            row.Parent = playerList
 
-                local rc = Instance.new("UICorner")
-                rc.CornerRadius = UDim.new(0, 6)
-                rc.Parent = row
+            local rc = Instance.new("UICorner")
+            rc.CornerRadius = UDim.new(0, 6)
+            rc.Parent = row
 
-                local rs = Instance.new("UIStroke")
-                rs.Color = Color3.fromRGB(255, 255, 255)
-                rs.Transparency = 0.6
-                rs.Thickness = 1
-                rs.Parent = row
+            local rs = Instance.new("UIStroke")
+            rs.Color = Color3.fromRGB(255, 255, 255)
+            rs.Transparency = 0.6
+            rs.Thickness = 1
+            rs.Parent = row
 
-                local nameBtn = Instance.new("TextButton")
-                nameBtn.Size = UDim2.new(1, -8, 1, 0)
-                nameBtn.BackgroundTransparency = 1
-                nameBtn.Text = "  " .. plr.Name
-                nameBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-                nameBtn.TextScaled = true
-                nameBtn.Font = Enum.Font.Gotham
-                nameBtn.TextXAlignment = Enum.TextXAlignment.Left
-                nameBtn.AutoButtonColor = false
-                nameBtn.Parent = row
-
-                nameBtn.MouseButton1Click:Connect(function()
-                    local root = Utils.getRoot()
-                    local targetRoot = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
-                    if root and targetRoot then
-                        root.CFrame = targetRoot.CFrame + Vector3.new(0, 0, 2)
-                        window.notify("Teleported to " .. plr.Name)
-                    end
-                end)
-            end
+            local nameBtn = Instance.new("TextButton")
+            nameBtn.Size = UDim2.new(1, -8, 1, 0)
+            nameBtn.BackgroundTransparency = 1
+            nameBtn.Text = "  " .. plr.Name
+            nameBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            nameBtn.TextScaled = true
+            nameBtn.Font = Enum.Font.Gotham
+            nameBtn.TextXAlignment = Enum.TextXAlignment.Left
+            nameBtn.AutoButtonColor = false
+            nameBtn.Parent = row
+            nameBtn.MouseButton1Click:Connect(function()
+                local root = Utils.getRoot()
+                local targetRoot = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
+                if root and targetRoot then
+                    root.CFrame = targetRoot.CFrame + Vector3.new(0, 0, 2)
+                    window.notify("Teleported to " .. plr.Name)
+                end
+            end)
         end
     end
     playersLabel.Text = "PLAYERS  " .. tostring(count)
 end
 
-local playerRefreshConn = RunService.Heartbeat:Connect(function()
-    updatePlayerList()
-end)
-
-local function isOverGui(mouseX, mouseY)
-    local frame = window.frame
-    if not frame or not frame.Visible then return false end
-    local pos = frame.AbsolutePosition
-    local size = frame.AbsoluteSize
-    return mouseX >= pos.X and mouseX <= pos.X + size.X and mouseY >= pos.Y and mouseY <= pos.Y + size.Y
-end
-
-UserInputService.InputBegan:Connect(function(input, gp)
-    if gp then return end
-    if input.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
-    if not state.clickTP then return end
-    local mouseLoc = UserInputService:GetMouseLocation()
-    if isOverGui(mouseLoc.X, mouseLoc.Y) then return end
-    local camera = Workspace.CurrentCamera
-    if not camera then return end
-    local unitRay = camera:ViewportPointToRay(mouseLoc.X, mouseLoc.Y)
-    local params = RaycastParams.new()
-    params.FilterType = Enum.RaycastFilterType.Blacklist
-    local char = Utils.getChar()
-    params.FilterDescendantsInstances = char and {char} or {}
-    local result = Workspace:Raycast(unitRay.Origin, unitRay.Direction * 1000, params)
-    if result then
-        Utils.trueTeleport(CFrame.new(result.Position + Vector3.new(0, 3, 0)))
-        window.notify("Teleported")
-    end
-end)
+RunService.Heartbeat:Connect(updatePlayerList)
 
 local function setupDeathProtection()
     local char = Utils.getChar()
