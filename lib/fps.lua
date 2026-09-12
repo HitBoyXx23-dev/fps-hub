@@ -14,6 +14,9 @@ local state = {
     triggerbotEnabled = false,
     teamCheck = false,
     wallCheck = true,
+    wallbangEnabled = false,
+    noclipEnabled = false,
+    invincibleEnabled = false,
     fovCircle = nil,
     fovRadius = 150,
     aimSmoothness = 0.15,
@@ -24,6 +27,8 @@ local state = {
     aimbotConn = nil,
     triggerbotConn = nil,
     fovConn = nil,
+    noclipConn = nil,
+    invincibleConn = nil,
 }
 
 local function getLocalPlayer()
@@ -41,6 +46,7 @@ local function isTeammate(plr)
 end
 
 local function isVisible(targetPart)
+    if state.wallbangEnabled then return true end
     if not state.wallCheck then return true end
     if not targetPart then return false end
     local camera = Workspace.CurrentCamera
@@ -266,29 +272,82 @@ function FPS.fovDisable()
     end
 end
 
-function FPS.setFovRadius(radius)
-    state.fovRadius = radius
+function FPS.noclipEnable()
+    if state.noclipEnabled then return end
+    state.noclipEnabled = true
+    state.noclipConn = RunService.Stepped:Connect(function()
+        if not state.noclipEnabled then return end
+        local char = LocalPlayer.Character
+        if not char then return end
+        for _, part in pairs(char:GetDescendants()) do
+            if part:IsA("BasePart") and part.CanCollide then
+                part.CanCollide = false
+            end
+        end
+    end)
 end
 
-function FPS.setAimSmoothness(value)
-    state.aimSmoothness = value
+function FPS.noclipDisable()
+    state.noclipEnabled = false
+    if state.noclipConn then
+        state.noclipConn:Disconnect()
+        state.noclipConn = nil
+    end
+    local char = LocalPlayer.Character
+    if not char then return end
+    for _, part in pairs(char:GetDescendants()) do
+        if part:IsA("BasePart") and not part.CanCollide then
+            pcall(function() part.CanCollide = true end)
+        end
+    end
 end
 
-function FPS.setTriggerDelay(value)
-    state.triggerDelay = value
+function FPS.invincibleEnable()
+    if state.invincibleEnabled then return end
+    state.invincibleEnabled = true
+    state.invincibleConn = RunService.Heartbeat:Connect(function()
+        if not state.invincibleEnabled then return end
+        local char = LocalPlayer.Character
+        if not char then return end
+        local hum = char:FindFirstChild("Humanoid")
+        if hum then
+            if hum.Health < hum.MaxHealth then
+                hum.Health = hum.MaxHealth
+            end
+            hum.BreakJointsOnDeath = false
+        end
+        if not char:FindFirstChild("ForceField") then
+            local ff = Instance.new("ForceField")
+            ff.Parent = char
+            task.delay(0.1, function()
+                if ff and ff.Parent then ff:Destroy() end
+            end)
+        end
+    end)
 end
 
-function FPS.setTeamCheck(value)
-    state.teamCheck = value
+function FPS.invincibleDisable()
+    state.invincibleEnabled = false
+    if state.invincibleConn then
+        state.invincibleConn:Disconnect()
+        state.invincibleConn = nil
+    end
 end
 
-function FPS.setWallCheck(value)
-    state.wallCheck = value
+function FPS.setFovRadius(radius) state.fovRadius = radius end
+function FPS.setAimSmoothness(value) state.aimSmoothness = value end
+function FPS.setTriggerDelay(value) state.triggerDelay = value end
+function FPS.setTeamCheck(value) state.teamCheck = value end
+function FPS.setWallCheck(value) state.wallCheck = value end
+
+function FPS.setWallbang(value)
+    state.wallbangEnabled = value
+    if value then
+        state.wallCheck = false
+    end
 end
 
-function FPS.getState()
-    return state
-end
+function FPS.getState() return state end
 
 Players.PlayerAdded:Connect(function(plr)
     plr.CharacterAdded:Connect(function()
