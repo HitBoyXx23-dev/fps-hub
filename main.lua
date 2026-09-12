@@ -67,6 +67,7 @@ end
 
 local uiModule = run("lib/ui.lua")
 local utilsModule = run("lib/utils.lua")
+local fpsModule = run("lib/fps.lua")
 
 if not uiModule then
     notify("FPS Hub", "Failed to load UI library")
@@ -78,8 +79,14 @@ if not utilsModule then
     return
 end
 
+if not fpsModule then
+    notify("FPS Hub", "Failed to load FPS library")
+    return
+end
+
 _G.FpsHubUI = uiModule
 _G.FpsHubUtils = utilsModule
+_G.FpsHubFPS = fpsModule
 _G.FpsHubLoaded = true
 _G.FpsHubGameId = gameId
 _G.FpsHubGameFile = gameFile
