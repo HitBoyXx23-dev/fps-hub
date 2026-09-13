@@ -3,11 +3,29 @@ local REPO_NAME = "fps-hub"
 local BRANCH = "main"
 local CACHE_BUST = "?v=" .. tostring(os.time())
 local BASE_URL = "https://cdn.jsdelivr.net/gh/" .. REPO_OWNER .. "/" .. REPO_NAME .. "@" .. BRANCH .. "/"
+local SELF_URL = "https://cdn.jsdelivr.net/gh/" .. REPO_OWNER .. "/" .. REPO_NAME .. "@" .. BRANCH .. "/main.lua"
 local PURGE_URL = "https://purge.jsdelivr.net/gh/" .. REPO_OWNER .. "/" .. REPO_NAME .. "@" .. BRANCH .. "/main.lua"
 
 pcall(function()
     game:HttpGet(PURGE_URL, true)
 end)
+
+local function queueOnTeleport()
+    local code = 'loadstring(game:HttpGet("' .. SELF_URL .. '?v=" .. tick()))()'
+    pcall(function()
+        if syn and syn.queue_on_teleport then
+            syn.queue_on_teleport(code)
+        elseif queue_on_teleport then
+            queue_on_teleport(code)
+        elseif fluxus and fluxus.queue_on_teleport then
+            fluxus.queue_on_teleport(code)
+        elseif krnl and krnl.queue_on_teleport then
+            krnl.queue_on_teleport(code)
+        end
+    end)
+end
+
+queueOnTeleport()
 
 local GAME_IDS = {
     [17625359962] = "rivals",
